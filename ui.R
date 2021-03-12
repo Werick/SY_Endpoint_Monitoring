@@ -1,7 +1,8 @@
 #UI
-#library(shiny)
+library(shiny)
 library(shinydashboard)
-#library(shinyWidgets)
+library(shinyWidgets)
+
 ui <- dashboardPage(
   dashboardHeader(title = "SY Endpoint Tracking Dashboard", titleWidth = 350),
   dashboardSidebar(
@@ -35,32 +36,57 @@ ui <- dashboardPage(
                 box(status = 'primary',
                     solidHeader = TRUE,
                     htmlOutput("total_enrollment"),
-                    uiOutput('enr_progress'),
-                    title = 'End -point Sammary Status'),
+                    uiOutput('endpoint_progress'),
+                    title = 'EndPoint Summary Status'),
                 
                 box(status = 'primary',
                     solidHeader = TRUE,
                     title = 'Breakdowns',
-                    selectInput("subbreakdown", label = 'Sub-Breakdown',
+                    selectInput("breakdown", label = 'Breakdown',
                                 # add initial VL to this,
-                                choices = c('None', 'Gender', 'Age Group', 'Marital', 'Pregnancy', 'Satisfaction Survey')))
+                                choices = c('None', 'Community', 'Gender', 'Participant Status')))
               ),
               fluidRow(
-                box(title="Intervention End-point Tracker", 
-                    htmlOutput("enroll_text_summary"),
-                    plotOutput("plot1_enrollment")
+                box(title="Intervention End-Point Tracker", 
+                    htmlOutput("enpdpoint_text_sum_int"),
+                    plotOutput("plot1_intervention", click = 'enr_click_intervention')
                 ),
                 
                 box(title="Control End-point Tracker", 
-                    htmlOutput("enroll_sub"),
-                    plotOutput("plot2_enrollment"),
-                    div(style = 'overflow-x: scroll', DT::dataTableOutput('enrollment_list')),
-                    downloadButton("download1","Download csv")
+                    htmlOutput("enpdpoint_text_sum_con"),
+                    plotOutput("plot1_control", click = 'enr_click_control')
                 )
               )
       ),
       tabItem(tabName = 'reports',
-              h2("Some Downloadable reports"))
+              h2("Some Downloadable reports"),
+              fluidRow(
+                box(status = 'primary',
+                    solidHeader = TRUE,
+                    htmlOutput("total_sup_inter"),
+                    uiOutput('endpoint_progress_intervention'),
+                    title = 'Intervention Suppression Summary Status'),
+                
+                box(status = 'primary',
+                    solidHeader = TRUE,
+                    title = 'Control Suppression Summary Status',
+                    htmlOutput("total_sup_contol"),
+                    uiOutput('endpoint_progress_control'))
+              ),
+              fluidRow(
+                box(title="Intervention EndPoint Tracker", 
+                    div(style = 'overflow-x: scroll', DT::dataTableOutput('endpoint_list_int')),
+                    downloadButton("download1","Download csv")
+                ),
+                
+                box(title="Control EndPoint Tracker", 
+                    div(style = 'overflow-x: scroll', DT::dataTableOutput('endpoint_list_con')),
+                    downloadButton("download2","Download csv")
+                )
+              )
+              )
+      
+      
     )
   )
 )

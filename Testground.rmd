@@ -1,0 +1,74 @@
+---
+title: "Untitled"
+author: "Wafula Erick"
+date: "3/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+version = '2021.03.12'
+file_path =  "C://SearchYouth//MSAccessDatabase//SY_Endpoint.mdb"
+
+
+helperfilepath <- file.path("script","helper_functions.R")
+communitypath <- file.path("data","community.csv")
+enrollmentpath <- file.path("data","enrollment.csv")
+
+# Load helper functions
+source(helperfilepath)
+# Load data
+
+df_all_tables <- readData(file_path)
+
+#load study sites
+df_comm_codes <- read.csv(file = communitypath, stringsAsFactors = FALSE)
+df_enroll_list <- read.csv(file = enrollmentpath, stringsAsFactors = FALSE)
+
+
+# Add region
+df_enroll_list$Region <- apply(df_enroll_list,1,addRegion, c = df_comm_codes)
+
+df_all_tables$endpoint$Community <- apply(df_all_tables$endpoint, 1, addCommunity, c = df_comm_codes)
+df_all_tables$endpoint$Region <- apply(df_all_tables$endpoint, 1, addRegion, c = df_comm_codes)
+
+df_all_tables$pss$Community <- apply(df_all_tables$pss, 1, addCommunity, c = df_comm_codes)
+df_all_tables$pss$Region <- apply(df_all_tables$pss, 1, addRegion, c = df_comm_codes)
+
+# Set the endpoint status
+df_enroll_list$'Endpoint Status' <- apply(df_enroll_list, 1, getEndpointStatus, epstatus=df_all_tables$endpoint)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+table(df_enroll_list$Community,df_enroll_list$`Endpoint Status`)
+
+#Option 1
+df_aggs <- data.frame(table(df_enroll_list$Community,df_enroll_list$`Endpoint Status`))
+head(df_aggs)
+
+#Option 2
+df_grps <- group_by(df_enroll_list, df_enroll_list$Community)
+df_aggs2 <- summarise(df_grps,
+                      'complete'=sum(''))
+
+
+ggplot(df_enroll_list, aes(x=Region,  fill=`Endpoint Status`))+
+  geom_bar(position = 'stack')
+names(df_enroll_list)
+factor(df_all_tables$endpoint$outcome)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
